@@ -29,6 +29,9 @@ jobs:
 
       - run: npm ci
       - run: npm run build
+        env:
+          VITE_COUSIN_NAME: ${{ vars.COUSIN_NAME }}
+          VITE_COUSIN_AGE: ${{ vars.COUSIN_AGE }}
 
       - uses: actions/upload-pages-artifact@v3
         with:
