@@ -15,12 +15,10 @@ export default function Step4Casting({ onComplete }: { onComplete: () => void })
   const [progress, setProgress] = useState(0)
   const [msgIndex, setMsgIndex] = useState(0)
   const [done, setDone] = useState(false)
-  const started = useRef(false)
+  const onCompleteRef = useRef(onComplete)
+  onCompleteRef.current = onComplete
 
   useEffect(() => {
-    if (started.current) return
-    started.current = true
-
     let pct = 0
     let msg = 0
     const interval = setInterval(() => {
@@ -30,7 +28,7 @@ export default function Step4Casting({ onComplete }: { onComplete: () => void })
         clearInterval(interval)
         setDone(true)
         setProgress(100)
-        onComplete()
+        onCompleteRef.current()
       } else {
         msg = Math.min(msg + 1, MESSAGES.length - 1)
         setMsgIndex(msg)
@@ -38,7 +36,7 @@ export default function Step4Casting({ onComplete }: { onComplete: () => void })
       }
     }, 420)
     return () => clearInterval(interval)
-  }, [onComplete])
+  }, [])
 
   return (
     <motion.div
