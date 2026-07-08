@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
+import MagicCanvas from './MagicCanvas'
 
 const MESSAGES = [
   'Preparando la incantación…',
@@ -17,6 +18,7 @@ export default function Step4Casting({ onComplete }: { onComplete: () => void })
   const [done, setDone] = useState(false)
   const onCompleteRef = useRef(onComplete)
   onCompleteRef.current = onComplete
+  const barTrackRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     let pct = 0
@@ -43,7 +45,9 @@ export default function Step4Casting({ onComplete }: { onComplete: () => void })
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
+      style={{ position: 'relative' }}
     >
+      <MagicCanvas progress={progress} done={done} barTrackRef={barTrackRef} />
       <div style={eyebrow}>Por favor espera</div>
       <h2 style={heading}>Lanzando el Hechizo</h2>
 
@@ -83,12 +87,26 @@ export default function Step4Casting({ onComplete }: { onComplete: () => void })
         {done ? '¡Hechizo completado!' : MESSAGES[msgIndex]}
       </motion.div>
 
-      <div style={barTrack}>
+      <div ref={barTrackRef} style={barTrack}>
         <motion.div
           animate={{ width: `${progress}%` }}
           transition={{ duration: 0.35, ease: 'easeOut' }}
-          style={barFill}
-        />
+          style={{ ...barFill, position: 'relative', overflow: 'hidden' }}
+        >
+          {!done && (
+            <motion.div
+              animate={{ x: ['-100%', '250%'] }}
+              transition={{ duration: 1.6, repeat: Infinity, ease: 'linear', repeatDelay: 0.4 }}
+              style={{
+                position: 'absolute',
+                top: 0, bottom: 0,
+                width: '45%',
+                background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent)',
+                pointerEvents: 'none',
+              }}
+            />
+          )}
+        </motion.div>
       </div>
       <div style={barPct}>{Math.round(progress)}%</div>
     </motion.div>

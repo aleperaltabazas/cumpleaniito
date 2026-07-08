@@ -10,6 +10,10 @@ const item = {
   hidden: { opacity: 0, y: 20 },
   show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 220, damping: 18 } },
 }
+const headingItem = {
+  hidden: { opacity: 0, scale: 0.3 },
+  show: { opacity: 1, scale: 1, transition: { type: 'spring', stiffness: 160, damping: 10 } },
+}
 
 export default function Step5Finish() {
   const ageText = COUSIN_AGE ? ` ${COUSIN_AGE}` : ''
@@ -20,7 +24,7 @@ export default function Step5Finish() {
       <Fireworks />
       <motion.div variants={container} initial="hidden" animate="show" style={{ textAlign: 'center' }}>
         <motion.div
-          variants={item}
+          variants={headingItem}
           style={{
             fontFamily: "'Cinzel Decorative', serif",
             fontSize: 'clamp(26px, 5vw, 34px)',

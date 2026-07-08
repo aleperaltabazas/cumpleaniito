@@ -1,5 +1,5 @@
-import { CSSProperties, ReactNode } from 'react'
-import { motion } from 'framer-motion'
+import { CSSProperties, ReactNode, useEffect, useRef } from 'react'
+import { motion, useAnimate } from 'framer-motion'
 
 interface WizBtnProps {
   children: ReactNode
@@ -10,8 +10,23 @@ interface WizBtnProps {
 }
 
 export default function WizBtn({ children, onClick, disabled, primary, style }: WizBtnProps) {
+  const [scope, animate] = useAnimate<HTMLButtonElement>()
+  const prevDisabled = useRef(disabled)
+
+  useEffect(() => {
+    if (prevDisabled.current && !disabled && scope.current) {
+      animate(
+        scope.current,
+        { scale: [1, 1.1, 1], boxShadow: ['0 2px 0 rgba(0,0,0,.3)', '0 0 22px rgba(232,112,58,.75)', '0 2px 0 rgba(0,0,0,.3)'] },
+        { duration: 0.5, ease: 'easeOut' }
+      )
+    }
+    prevDisabled.current = disabled
+  }, [disabled, animate, scope])
+
   return (
     <motion.button
+      ref={scope}
       onClick={onClick}
       disabled={disabled}
       whileHover={disabled ? {} : { y: -2, boxShadow: '0 4px 14px rgba(232,112,58,.45)' }}

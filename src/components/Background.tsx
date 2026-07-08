@@ -1,7 +1,15 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { motion } from 'framer-motion'
+
+interface ShootingStar {
+  id: number
+  top: number
+  left: number
+}
 
 export default function Background() {
   const starsRef = useRef(null)
+  const [shootingStars, setShootingStars] = useState<ShootingStar[]>([])
 
   useEffect(() => {
     const container = starsRef.current
@@ -24,6 +32,20 @@ export default function Background() {
     return () => { container.innerHTML = '' }
   }, [])
 
+  useEffect(() => {
+    function scheduleNext(): ReturnType<typeof setTimeout> {
+      const delay = 2500 + Math.random() * 4000
+      return setTimeout(() => {
+        const id = Date.now()
+        setShootingStars(prev => [...prev, { id, top: Math.random() * 50, left: Math.random() * 70 }])
+        setTimeout(() => setShootingStars(prev => prev.filter(s => s.id !== id)), 900)
+        scheduleNext()
+      }, delay)
+    }
+    const t = scheduleNext()
+    return () => clearTimeout(t)
+  }, [])
+
   return (
     <>
       <style>{`
@@ -40,6 +62,33 @@ export default function Background() {
         }
       `}</style>
       <div ref={starsRef} style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none' }} />
+      {shootingStars.map(star => (
+        <div
+          key={star.id}
+          style={{
+            position: 'fixed',
+            top: `${star.top}vh`,
+            left: `${star.left}vw`,
+            transform: 'rotate(28deg)',
+            transformOrigin: 'left center',
+            zIndex: 0,
+            pointerEvents: 'none',
+          }}
+        >
+          <motion.div
+            initial={{ scaleX: 0, opacity: 0 }}
+            animate={{ scaleX: [0, 1, 1], opacity: [0, 0.9, 0] }}
+            transition={{ duration: 0.7, ease: 'easeOut', times: [0, 0.35, 1] }}
+            style={{
+              width: 110,
+              height: 2,
+              borderRadius: 2,
+              background: 'linear-gradient(90deg, rgba(236,224,194,0.9), rgba(236,224,194,0))',
+              transformOrigin: 'left center',
+            }}
+          />
+        </div>
+      ))}
       <div style={{
         position: 'fixed', left: 0, right: 0, bottom: 0, height: '26vh', zIndex: 0,
         background: 'linear-gradient(180deg, transparent, var(--void) 90%)',
