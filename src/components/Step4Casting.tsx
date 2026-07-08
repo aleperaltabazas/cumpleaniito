@@ -34,7 +34,7 @@ export default function Step4Casting({ onComplete }: { onComplete: () => void })
         setMsgIndex(msg)
         setProgress(pct)
       }
-    }, 420)
+    }, 2000)
     return () => clearInterval(interval)
   }, [])
 
