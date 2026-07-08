@@ -9,7 +9,12 @@ const item = {
   show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 260, damping: 22 } },
 }
 
-export default function Step2Terms({ agreed, onAgreeChange }) {
+interface Step2TermsProps {
+  agreed: boolean
+  onAgreeChange: (value: boolean) => void
+}
+
+export default function Step2Terms({ agreed, onAgreeChange }: Step2TermsProps) {
   return (
     <motion.div variants={container} initial="hidden" animate="show">
       <motion.div variants={item} style={eyebrow}>Antes de proceder</motion.div>

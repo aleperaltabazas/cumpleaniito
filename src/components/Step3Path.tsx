@@ -15,7 +15,12 @@ const item = {
   show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 260, damping: 22 } },
 }
 
-export default function Step3Path({ selected, onSelect }) {
+interface Step3PathProps {
+  selected: string | null
+  onSelect: (value: string) => void
+}
+
+export default function Step3Path({ selected, onSelect }: Step3PathProps) {
   return (
     <motion.div variants={container} initial="hidden" animate="show">
       <motion.div variants={item} style={eyebrow}>Personaliza tu celebración</motion.div>

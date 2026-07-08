@@ -11,7 +11,7 @@ const MESSAGES = [
   '¡Finalizando el hechizo…!',
 ]
 
-export default function Step4Casting({ onComplete }) {
+export default function Step4Casting({ onComplete }: { onComplete: () => void }) {
   const [progress, setProgress] = useState(0)
   const [msgIndex, setMsgIndex] = useState(0)
   const [done, setDone] = useState(false)

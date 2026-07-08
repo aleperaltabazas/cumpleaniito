@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 
 const LABELS = ['I', 'II', 'III', 'IV', 'V']
 
-export default function Runes({ current }) {
+export default function Runes({ current }: { current: number }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'center', gap: 18 }}>
       {LABELS.map((label, idx) => {

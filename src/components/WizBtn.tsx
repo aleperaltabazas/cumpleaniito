@@ -1,6 +1,15 @@
+import { CSSProperties, ReactNode } from 'react'
 import { motion } from 'framer-motion'
 
-export default function WizBtn({ children, onClick, disabled, primary, style }) {
+interface WizBtnProps {
+  children: ReactNode
+  onClick?: () => void
+  disabled?: boolean
+  primary?: boolean
+  style?: CSSProperties
+}
+
+export default function WizBtn({ children, onClick, disabled, primary, style }: WizBtnProps) {
   return (
     <motion.button
       onClick={onClick}
