@@ -1,0 +1,42 @@
+:root {
+  --void: #100c1e;
+  --night: #1b1738;
+  --night-2: #2a2150;
+  --parchment: #ece0c2;
+  --parchment-dim: #cbb98f;
+  --gold: #c9a227;
+  --gold-bright: #f0c95c;
+  --ember: #e8703a;
+  --ink: #2a2016;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; height: 100%; }
+
+body {
+  font-family: 'EB Garamond', serif;
+  background: radial-gradient(ellipse at 50% 20%, var(--night-2) 0%, var(--void) 65%);
+  color: var(--parchment);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-x: hidden;
+  position: relative;
+}
+
+#root {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 100vh;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

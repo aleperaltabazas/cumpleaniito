@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Birthday Wizard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@500;600&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void: #100c1e;
+    --night: #1b1738;
+    --night-2: #2a2150;
+    --parchment: #ece0c2;
+    --parchment-dim: #cbb98f;
+    --gold: #c9a227;
+    --gold-bright: #f0c95c;
+    --ember: #e8703a;
+    --ink: #2a2016;
+  }
+
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; height:100%; }
+
+  body{
+    font-family: 'EB Garamond', serif;
+    background: radial-gradient(ellipse at 50% 20%, var(--night-2) 0%, var(--void) 65%);
+    color: var(--parchment);
+    min-height: 100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow-x:hidden;
+    position: relative;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+  }
+
+  /* ---------- Starfield ---------- */
+  #stars{
+    position: fixed; inset:0; z-index:0; pointer-events:none;
+  }
+  .star{
+    position:absolute; background: var(--parchment); border-radius:50%;
+    opacity: 0.6;
+    animation: twinkle 4s ease-in-out infinite;
+  }
+  @keyframes twinkle{
+    0%,100%{ opacity:.15; }
+    50%{ opacity:.9; }
+  }
+
+  .mountains{
+    position: fixed; left:0; right:0; bottom:0; height: 26vh; z-index:0;
+    background: linear-gradient(180deg, transparent, var(--void) 90%);
+    pointer-events:none;
+  }
+  .mountains svg{ width:100%; height:100%; display:block; }
+
+  /* ---------- Installer window ---------- */
+  .installer{
+    position: relative;
+    z-index: 2;
+    width: min(640px, 92vw);
+    background:
+      linear-gradient(180deg, #f4e9cc, #e6d5a8 55%, #d8c290);
+    border-radius: 10px;
+    box-shadow:
+      0 0 0 1px #7a5f22,
+      0 0 0 6px #241c3d,
+      0 25px 60px rgba(0,0,0,.65),
+      0 0 90px rgba(201,162,39,.12);
+    color: var(--ink);
+    overflow: hidden;
+    animation: rise 900ms ease-out;
+  }
+  @keyframes rise{
+    from{ opacity:0; transform: translateY(24px) scale(.98); }
+    to{ opacity:1; transform: translateY(0) scale(1); }
+  }
+
+  .titlebar{
+    background: linear-gradient(180deg, #241c3d, #150f28);
+    color: var(--gold-bright);
+    padding: 18px 24px 16px;
+    border-bottom: 3px solid var(--gold);
+  }
+  .titlebar h1{
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(18px, 3.2vw, 24px);
+    letter-spacing: .04em;
+    margin: 0 0 12px;
+    text-align:center;
+    text-shadow: 0 0 14px rgba(240,201,92,.45);
+  }
+
+  .runes{
+    display:flex;
+    justify-content:center;
+    gap: 18px;
+  }
+  .rune{
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    border: 2px solid #6b5a2e;
+    background: radial-gradient(circle at 35% 30%, #3a2e1a, #1c1608);
+    display:flex; align-items:center; justify-content:center;
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    color: #6b5a2e;
+    transition: all .5s ease;
+    position: relative;
+  }
+  .rune::after{
+    content:'';
+    position:absolute; inset:-6px;
+    border-radius:50%;
+    box-shadow: 0 0 0 0 rgba(240,201,92,0);
+    transition: box-shadow .5s ease;
+  }
+  .rune.active{
+    border-color: var(--gold-bright);
+    background: radial-gradient(circle at 35% 30%, var(--ember), #7a3a12);
+    color: var(--gold-bright);
+    box-shadow: 0 0 12px rgba(232,112,58,.7);
+  }
+  .rune.active::after{
+    box-shadow: 0 0 0 4px rgba(240,201,92,.12);
+  }
+  .rune.done{
+    border-color: var(--gold);
+    background: radial-gradient(circle at 35% 30%, var(--gold-bright), #8a6c1a);
+    color: #2a2016;
+  }
+
+  .step-content{
+    min-height: 340px;
+    padding: 34px 36px 20px;
+    position: relative;
+  }
+
+  .step{
+    display:none;
+    animation: fadeSlide 480ms ease;
+  }
+  .step.active{ display:block; }
+  @keyframes fadeSlide{
+    from{ opacity:0; transform: translateX(14px); }
+    to{ opacity:1; transform: translateX(0); }
+  }
+
+  .eyebrow{
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: #8a6c1a;
+    margin: 0 0 6px;
+  }
+  h2{
+    font-family: 'Cinzel', serif;
+    font-size: clamp(22px, 4vw, 28px);
+    margin: 0 0 14px;
+    color: var(--ink);
+  }
+  p{
+    font-size: 19px;
+    line-height: 1.55;
+    margin: 0 0 14px;
+    color: #3a2e1c;
+  }
+
+  /* step 1: welcome */
+  .staff-icon{
+    display:block;
+    margin: 0 auto 18px;
+    width: 74px; height: 74px;
+  }
+
+  /* step 2: terms */
+  .scroll-box{
+    background: #f8f0da;
+    border: 1px solid #b79a4d;
+    border-radius: 6px;
+    padding: 14px 16px;
+    height: 130px;
+    overflow-y: auto;
+    font-size: 16px;
+    line-height: 1.55;
+    color: #4a3c22;
+    box-shadow: inset 0 0 10px rgba(0,0,0,.08);
+    margin-bottom: 16px;
+  }
+  .agree-row{
+    display:flex;
+    align-items:center;
+    gap: 10px;
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    letter-spacing: .02em;
+  }
+  .agree-row input{
+    width: 18px; height: 18px;
+    accent-color: var(--ember);
+  }
+
+  /* step 3: choose path */
+  .path-options{
+    display:grid;
+    gap: 12px;
+  }
+  .path-card{
+    display:flex; align-items:center; gap:14px;
+    border: 1px solid #b79a4d;
+    background: #f8f0da;
+    border-radius: 8px;
+    padding: 12px 16px;
+    cursor:pointer;
+    transition: all .25s ease;
+  }
+  .path-card:hover{ border-color: var(--ember); transform: translateY(-1px); }
+  .path-card input{ accent-color: var(--ember); width:16px; height:16px; }
+  .path-card .glyph{ font-size: 22px; width: 28px; text-align:center; }
+  .path-card .label-main{ font-family:'Cinzel', serif; font-size:15px; display:block; }
+  .path-card .label-sub{ font-size: 14px; color:#6b5a3e; display:block; }
+  .path-card.selected{
+    border-color: var(--ember);
+    background: #f2e3bd;
+    box-shadow: 0 0 0 2px rgba(232,112,58,.25);
+  }
+
+  /* step 4: installing */
+  .status-line{
+    font-family:'Cinzel', serif;
+    font-size: 14px;
+    letter-spacing:.03em;
+    color: #6b5a2e;
+    margin: 6px 0 10px;
+    min-height: 18px;
+  }
+  .bar-track{
+    height: 20px;
+    border-radius: 10px;
+    background: #d8c8a0;
+    border: 1px solid #b79a4d;
+    overflow:hidden;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,.25);
+  }
+  .bar-fill{
+    height:100%;
+    width:0%;
+    border-radius: 10px;
+    background: linear-gradient(90deg, var(--ember), var(--gold-bright));
+    box-shadow: 0 0 12px rgba(232,112,58,.6);
+    transition: width .35s ease;
+  }
+  .bar-pct{
+    text-align:right;
+    font-family:'Cinzel', serif;
+    font-size: 13px;
+    color:#6b5a2e;
+    margin-top:6px;
+  }
+  .rune-spin{
+    width: 46px; height:46px;
+    margin: 22px auto 4px;
+    border: 3px solid #d8c8a0;
+    border-top-color: var(--ember);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+
+  /* step 5: finish */
+  .finish-head{
+    font-family:'Cinzel Decorative', serif;
+    font-size: clamp(26px, 5vw, 34px);
+    text-align:center;
+    color: var(--ink);
+    margin: 4px 0 12px;
+    text-shadow: 0 0 18px rgba(232,112,58,.25);
+  }
+  .finish-text{ text-align:center; }
+
+  .nav-buttons{
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+    padding: 16px 30px 24px;
+    border-top: 1px solid #b79a4d;
+    background: linear-gradient(180deg, #e3d1a2, #d8c290);
+  }
+  .wizbtn{
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    letter-spacing: .04em;
+    padding: 11px 22px;
+    border-radius: 6px;
+    border: 1px solid #6b5a2e;
+    background: linear-gradient(180deg, #3a2e5c, #211a3a);
+    color: var(--gold-bright);
+    cursor: pointer;
+    transition: all .2s ease;
+    box-shadow: 0 2px 0 rgba(0,0,0,.3);
+  }
+  .wizbtn:hover:not(:disabled){
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(232,112,58,.35);
+    border-color: var(--ember);
+  }
+  .wizbtn:disabled{
+    opacity: .35;
+    cursor: not-allowed;
+  }
+  .wizbtn.primary{
+    background: linear-gradient(180deg, var(--ember), #a6431b);
+    color: #fff6e4;
+  }
+  .wizbtn:focus-visible{
+    outline: 3px solid var(--gold-bright);
+    outline-offset: 2px;
+  }
+  .spacer{ flex:1; }
+
+  /* Fireworks canvas overlay for finish step */
+  #fireworks{
+    position: fixed; inset:0;
+    z-index: 1;
+    pointer-events:none;
+  }
+</style>
+</head>
+<body>
+
+<div id="stars"></div>
+<div class="mountains">
+  <svg viewBox="0 0 800 200" preserveAspectRatio="none">
+    <polygon points="0,200 0,120 120,40 220,110 320,60 430,130 520,70 640,120 720,90 800,140 800,200" fill="#0c0918"/>
+    <polygon points="0,200 0,160 150,100 280,150 400,110 560,160 680,130 800,170 800,200" fill="#150f28"/>
+  </svg>
+</div>
+<canvas id="fireworks"></canvas>
+
+<div class="installer">
+  <div class="titlebar">
+    <h1>The Birthday Wizard</h1>
+    <div class="runes" id="runes">
+      <div class="rune" data-i="1">I</div>
+      <div class="rune" data-i="2">II</div>
+      <div class="rune" data-i="3">III</div>
+      <div class="rune" data-i="4">IV</div>
+      <div class="rune" data-i="5">V</div>
+    </div>
+  </div>
+
+  <div class="step-content">
+
+    <!-- Step 1: Welcome -->
+    <section class="step" data-step="1">
+      <svg class="staff-icon" viewBox="0 0 100 100" fill="none">
+        <line x1="50" y1="10" x2="50" y2="90" stroke="#8a6c1a" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="50" cy="12" r="9" fill="#e8703a" opacity="0.9"/>
+        <circle cx="50" cy="12" r="15" fill="none" stroke="#f0c95c" stroke-width="1.5" opacity="0.6"/>
+      </svg>
+      <div class="eyebrow">Welcome, traveler</div>
+      <h2>A Ritual Awaits</h2>
+      <p>Somewhere, a candle counts one higher than it did yesterday. This wizard shall guide you through the sacred (and mildly bureaucratic) rite of wishing your cousin a very happy birthday.</p>
+      <p>Five short steps stand between you and the spell's completion. Do you accept the quest?</p>
+    </section>
+
+    <!-- Step 2: Terms -->
+    <section class="step" data-step="2">
+      <div class="eyebrow">Before we proceed</div>
+      <h2>Terms of Enchantment</h2>
+      <div class="scroll-box">
+        By continuing, you acknowledge and agree to the following:<br><br>
+        1. One (1) year of wisdom shall be bestowed upon the birthday-haver, whether they asked for it or not.<br>
+        2. Cake is mandatory. Candles are non-negotiable. Wishes made while blowing them out are binding under ancient law.<br>
+        3. Any resemblance to Gandalf, wizards, or wandering grey-cloaked strangers who show up uninvited but are secretly delighted to see you, is entirely intentional.<br>
+        4. This installer may express excessive affection for the recipient. There is no way to disable this feature.
+      </div>
+      <label class="agree-row">
+        <input type="checkbox" id="agreeBox">
+        I agree to grow one year wiser
+      </label>
+    </section>
+
+    <!-- Step 3: Choose your path -->
+    <section class="step" data-step="3">
+      <div class="eyebrow">Customize your celebration</div>
+      <h2>Choose Your Path</h2>
+      <p>Every good wizard offers a choice that changes nothing but feels important. Pick one:</p>
+      <div class="path-options" id="pathOptions">
+        <label class="path-card">
+          <input type="radio" name="path" value="quiet">
+          <span class="glyph">🍵</span>
+          <span>
+            <span class="label-main">The Quiet Hearth</span>
+            <span class="label-sub">Tea, good company, minimal chaos</span>
+          </span>
+        </label>
+        <label class="path-card">
+          <input type="radio" name="path" value="feast">
+          <span class="glyph">🎉</span>
+          <span>
+            <span class="label-main">The Legendary Feast</span>
+            <span class="label-sub">Cake stacked to unsafe heights</span>
+          </span>
+        </label>
+        <label class="path-card">
+          <input type="radio" name="path" value="quest">
+          <span class="glyph">🗡️</span>
+          <span>
+            <span class="label-main">The Epic Quest</span>
+            <span class="label-sub">Adventure first, presents later</span>
+          </span>
+        </label>
+      </div>
+    </section>
+
+    <!-- Step 4: Installing -->
+    <section class="step" data-step="4">
+      <div class="eyebrow">Please wait</div>
+      <h2>Casting the Spell</h2>
+      <div class="rune-spin" aria-hidden="true"></div>
+      <div class="status-line" id="statusLine">Preparing incantation…</div>
+      <div class="bar-track"><div class="bar-fill" id="barFill"></div></div>
+      <div class="bar-pct" id="barPct">0%</div>
+    </section>
+
+    <!-- Step 5: Finish -->
+    <section class="step" data-step="5">
+      <div class="finish-head">🎂 Happy Birthday! 🎂</div>
+      <p class="finish-text">The spell is complete. May this year bring you good fortune, better stories, and cake in quantities that would make a dragon jealous.</p>
+      <p class="finish-text"><em>— With love, from your favorite cousin (installer's own words, not officially verified)</em></p>
+    </section>
+
+  </div>
+
+  <div class="nav-buttons">
+    <button class="wizbtn" id="backBtn">‹ Back</button>
+    <div class="spacer"></div>
+    <button class="wizbtn primary" id="nextBtn">Begin ›</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  const totalSteps = 5;
+  let current = 1;
+
+  const steps = document.querySelectorAll('.step');
+  const runes = document.querySelectorAll('.rune');
+  const backBtn = document.getElementById('backBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const agreeBox = document.getElementById('agreeBox');
+  const pathOptions = document.getElementById('pathOptions');
+
+  let installStarted = false;
+  let installDone = false;
+
+  function updateRunes(){
+    runes.forEach(r=>{
+      const i = parseInt(r.dataset.i,10);
+      r.classList.remove('active','done');
+      if(i < current) r.classList.add('done');
+      else if(i === current) r.classList.add('active');
+    });
+  }
+
+  function canAdvanceFrom(step){
+    if(step === 2) return agreeBox.checked;
+    if(step === 4) return installDone;
+    return true;
+  }
+
+  function render(){
+    steps.forEach(s=>{
+      s.classList.toggle('active', parseInt(s.dataset.step,10) === current);
+    });
+    updateRunes();
+
+    backBtn.disabled = current === 1;
+    backBtn.style.visibility = current === 1 ? 'hidden' : 'visible';
+
+    if(current === 1){
+      nextBtn.textContent = 'Begin ›';
+    } else if(current === totalSteps){
+      nextBtn.textContent = 'Finish ✦';
+    } else {
+      nextBtn.textContent = 'Next ›';
+    }
+
+    nextBtn.disabled = !canAdvanceFrom(current);
+
+    if(current === 4 && !installStarted){
+      installStarted = true;
+      runInstall();
+    }
+    if(current === 5){
+      launchFireworks();
+    }
+  }
+
+  agreeBox.addEventListener('change', ()=>{ nextBtn.disabled = !canAdvanceFrom(current); });
+
+  pathOptions.addEventListener('change', (e)=>{
+    document.querySelectorAll('.path-card').forEach(c=>c.classList.remove('selected'));
+    e.target.closest('.path-card').classList.add('selected');
+  });
+
+  backBtn.addEventListener('click', ()=>{
+    if(current > 1){ current--; render(); }
+  });
+
+  nextBtn.addEventListener('click', ()=>{
+    if(!canAdvanceFrom(current)) return;
+    if(current === totalSteps){
+      current = 1;
+      installStarted = false;
+      installDone = false;
+      document.getElementById('barFill').style.width = '0%';
+      document.getElementById('barPct').textContent = '0%';
+      render();
+      return;
+    }
+    current++;
+    render();
+  });
+
+  function runInstall(){
+    const messages = [
+      'Preparing incantation…',
+      'Summoning candles…',
+      'Aligning the stars…',
+      'Polishing wisdom (one year\u2019s worth)…',
+      'Untangling streamers…',
+      'Waking the cake…',
+      'Finalizing the spell…'
+    ];
+    const fill = document.getElementById('barFill');
+    const pct = document.getElementById('barPct');
+    const status = document.getElementById('statusLine');
+    let progress = 0;
+    let msgIndex = 0;
+    status.textContent = messages[0];
+
+    const interval = setInterval(()=>{
+      progress += Math.random()*14 + 6;
+      if(progress >= 100){
+        progress = 100;
+        clearInterval(interval);
+        installDone = true;
+        status.textContent = 'Spell complete!';
+        if(current === 4) nextBtn.disabled = false;
+      } else {
+        msgIndex = Math.min(msgIndex+1, messages.length-1);
+        status.textContent = messages[msgIndex];
+      }
+      fill.style.width = progress + '%';
+      pct.textContent = Math.round(progress) + '%';
+    }, 420);
+  }
+
+  render();
+
+  // ---------- Starfield ----------
+  const starsContainer = document.getElementById('stars');
+  const starCount = 90;
+  for(let i=0;i<starCount;i++){
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random()*2 + 1;
+    s.style.width = size+'px';
+    s.style.height = size+'px';
+    s.style.left = Math.random()*100 + 'vw';
+    s.style.top = Math.random()*70 + 'vh';
+    s.style.animationDelay = (Math.random()*4)+'s';
+    s.style.animationDuration = (3+Math.random()*3)+'s';
+    starsContainer.appendChild(s);
+  }
+
+  // ---------- Fireworks (canvas) ----------
+  const canvas = document.getElementById('fireworks');
+  const ctx = canvas.getContext('2d');
+  let fwParticles = [];
+  let fwRunning = false;
+  let fwFrame = null;
+
+  function resizeCanvas(){
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  const fwColors = ['#f0c95c','#e8703a','#c9a227','#f4e9cc','#e0a15a'];
+
+  function spawnBurst(x,y){
+    const count = 34;
+    for(let i=0;i<count;i++){
+      const angle = (Math.PI*2*i)/count + Math.random()*0.2;
+      const speed = 2 + Math.random()*3.2;
+      fwParticles.push({
+        x, y,
+        vx: Math.cos(angle)*speed,
+        vy: Math.sin(angle)*speed,
+        life: 1,
+        decay: 0.012 + Math.random()*0.012,
+        color: fwColors[Math.floor(Math.random()*fwColors.length)],
+        size: 1.5 + Math.random()*1.8
+      });
+    }
+  }
+
+  function fwTick(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    fwParticles.forEach(p=>{
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.02;
+      p.life -= p.decay;
+    });
+    fwParticles = fwParticles.filter(p=>p.life>0);
+    fwParticles.forEach(p=>{
+      ctx.globalAlpha = Math.max(p.life,0);
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+      ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+
+    if(fwRunning || fwParticles.length>0){
+      fwFrame = requestAnimationFrame(fwTick);
+    } else {
+      fwFrame = null;
+    }
+  }
+
+  let fwBurstTimer = null;
+  function launchFireworks(){
+    if(fwRunning) return;
+    fwRunning = true;
+    let bursts = 0;
+    const maxBursts = 6;
+    fwBurstTimer = setInterval(()=>{
+      const x = canvas.width*0.2 + Math.random()*canvas.width*0.6;
+      const y = canvas.height*0.15 + Math.random()*canvas.height*0.35;
+      spawnBurst(x,y);
+      bursts++;
+      if(bursts >= maxBursts){
+        clearInterval(fwBurstTimer);
+        fwRunning = false;
+      }
+    }, 500);
+    if(!fwFrame) fwTick();
+  }
+
+})();
+</script>
+
+</body>
+</html>
