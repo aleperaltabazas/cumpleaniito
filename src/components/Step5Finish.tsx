@@ -4,7 +4,8 @@ import Fireworks from './Fireworks'
 
 const container = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.15, delayChildren: 0.1 } },
+  // delayChildren matches the white-fade window so elements emerge as screen clears
+  show: { transition: { staggerChildren: 0.18, delayChildren: 0.45 } },
 }
 const item = {
   hidden: { opacity: 0, y: 20 },
